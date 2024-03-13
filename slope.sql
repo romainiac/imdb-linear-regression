@@ -1,7 +1,8 @@
-alter VIEW Slopes as
+alter view Slopes as
 SELECT 
   tconst,
   primaryTitle,
+  runtimeMinutes,
   startYear,
   slope,
   y_bar as averageRating,
@@ -12,6 +13,7 @@ FROM
   SELECT 
     tconst,
     primaryTitle,
+    runtimeMinutes,
     startYear,
     y_bar,
     totalVotes,
@@ -22,6 +24,7 @@ FROM
     SELECT 
       tconst,
       primaryTitle,
+      runtimeMinutes,
       averageRating,
       totalVotes,
       startYear,
@@ -33,6 +36,7 @@ FROM
       SELECT 
       	tconst,
         primaryTitle,
+        runtimeMinutes,
         startYear,
         ROW_NUMBER() OVER (PARTITION BY primaryTitle,startYear ORDER BY seasonNumber, episodeNumber) AS episodeCount,
         averageRating,
@@ -42,6 +46,7 @@ FROM
         SELECT 
           tb.tconst,
           tb.primaryTitle,
+          tb.runtimeMinutes,
           tb.startYear,
           tr.numVotes,
           CONVERT(te.seasonNumber, DECIMAL) as seasonNumber,
@@ -51,48 +56,15 @@ FROM
           title_basics as tb
           INNER JOIN title_episode as te on tb.tconst = te.parentTConst
           INNER JOIN title_ratings as tr on te.tconst = tr.tconst
-        WHERE 
-          tb.titleType = "tvSeries"
+         WHERE
+           tb.titleType = "tvSeries" and te.seasonNumber != 0
         ORDER BY 
           tb.tconst,primaryTitle, seasonNumber, episodeNumber, averageRating
       ) as a
     ) as b
   ) as c
   GROUP BY 
-    tconst,primaryTitle, startYear, y_bar, totalVotes
+    tconst,primaryTitle, startYear, y_bar, totalVotes, runtimeMinutes
 ) as d
 WHERE slope IS NOT NULL;
 ORDER by slope
-
-SELECT 
-	primaryTitle,
-	startYear,
-	slope,
-	slopes.totalVotes as totalEpisodeVotes,
-	title_ratings.numVotes as totalShowVotes,
-	slopes.averageRating as episodeAverageRating,
-	title_ratings.averageRating as tvShowRating,
-	episodeCount
-FROM 
-	slopes 
-	INNER JOIN title_ratings on slopes.tconst = title_ratings.tconst
-WHERE slopes.averageRating > 7
-AND title_ratings.averageRating > 7
-AND slopes.totalVotes > 100000
-AND episodeCount > 30
-ORDER by slope desc
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
