@@ -8,7 +8,7 @@ title_ratings = pandas.read_csv('title.ratings.tsv',sep='\t')
 
 # This matrix can be of any size (i hope). But i will limit it to 3x3 otherwise graphs will be too small
 shows = [
-        [("The Blacklist", "2013")]
+        [("Better Call Saul", "2015")]
          ]
 
 figure, axis = plt.subplots(len(shows), len(shows[0])) 
@@ -52,6 +52,7 @@ def plot(x_values, y_values, axisPos, title):
     regression_line = np.polyval(coefficients, x_values)
     slope = coefficients[0]
     axisPos.set_title(title + ": " + "{:.4f}".format(slope), fontsize=25)
+    axisPos.set_ylim([0, 10])
     axisPos.set_xlabel("Episode Number", fontsize=15)
     axisPos.set_ylabel("Episode Rating", fontsize=15)
     
@@ -63,7 +64,9 @@ def plot(x_values, y_values, axisPos, title):
 for i in range(len(shows)):
     for j in range(len(shows[i])):
         name = search_tv_series(shows[i][j][0], shows[i][j][1])
-        if len(shows) == 1 or len(shows[0]) == 1:
+        if (len(name[0]) == 0):
+            print("Show not found")
+        elif len(shows) == 1 or len(shows[0]) == 1:
             plot(name[0], name[1], axis, name[2])
         else:
             plot(name[0], name[1], axis[i,j], name[2])
